@@ -24,7 +24,7 @@ async def chat(req: ChatRequest):
             json={
                 "model": "llama3.2",
                 "messages": [{"role": "user", "content": req.message}],
-                "streaming": False,
+                "stream": False,
             },
         )
     answer = resp.json()["choices"][0]["message"]["content"]
