@@ -12,7 +12,7 @@ async def stream_llm_response(
     async with httpx.AsyncClient(timeout=120) as client:
         async with client.stream(
             "POST",
-            LLM_BASE_URL,
+            f"{LLM_BASE_URL}/v1/chat/completions",
             json={"model": model, "messages": messages, "stream": True},
         ) as resp:
             async for line in resp.aiter_lines():
