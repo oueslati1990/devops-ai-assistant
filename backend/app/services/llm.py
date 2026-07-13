@@ -17,7 +17,10 @@ async def stream_llm_response(
         ) as resp:
             async for line in resp.aiter_lines():
                 if line.startswith("data: ") and line != "data: [DONE]":
-                    data = json.loads(line[6:])
-                    delta = data["choices"][0]["delta"].get("content", "")
-                    if delta:
-                        yield delta
+                    try:
+                        data = json.loads(line[6:])
+                        delta = data["choices"][0]["delta"].get("content", "")
+                        if delta:
+                            yield delta
+                    except (json.JSONDecodeError, KeyError):
+                        continue
