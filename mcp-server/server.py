@@ -1,50 +1,19 @@
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-from mcp import types
-import asyncio
+from mcp.server.fastmcp import FastMCP
+from tools.git_tools import git_read as _git_read
 
-from tools.git_tools import git_read
-
-app = Server("Devops ai assistant")
+mcp = FastMCP("Devops ai assistant")
 
 
-@app.list_tools()
-async def list_tools() -> list[types.Tool]:
-    return [
-        types.Tool(
-            name="git_read",
-            description="Read Git repository information: commit history, diff, status, branches",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "repo_path": {
-                        "type": "string",
-                        "description": "Absolute path to the git repository",
-                    },
-                    "command": {
-                        "type": "string",
-                        "description": "Git subcommand, e.g. 'log --oneline -10'",
-                    },
-                },
-                "required": ["repo_path", "command"],
-            },
-        )
-    ]
+@mcp.tool()
+def git_read(repo_path: str, command: str) -> str:
+    """Read Git repository information: commit history, diff, status, branches.
 
-
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
-    if name == "git_read":
-        result = git_read(arguments["repo_path"], arguments["command"])
-    else:
-        result = f"Unknown tool: {name}"
-    return [types.TextContent(type="text", text=result)]
-
-
-async def main():
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(read_stream, write_stream, app.create_initialization_options())
+    Args:
+        repo_path: Absolute path to the git repository.
+        command: Git subcommand, e.g. 'log --oneline -10' or 'status'.
+    """
+    return _git_read(repo_path, command)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    mcp.run()
