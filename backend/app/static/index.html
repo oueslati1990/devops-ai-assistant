@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DevOps AI Assistant</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        #messages {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            height: 60vh;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .msg-user {
+            text-align: right;
+            margin: 0.5rem 0;
+        }
+
+        .msg-user span {
+            background: #2563eb;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            display: inline-block;
+            max-width: 80%;
+        }
+
+        .msg-ai {
+            margin: 0.5rem 0;
+        }
+
+        .msg-ai span {
+            background: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            display: inline-block;
+            max-width: 80%;
+            white-space: pre-wrap;
+        }
+
+        #controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        #input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        select {
+            padding: 0.4rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>DevOps AI Assistant</h2>
+
+    <div id="controls">
+        <label>Model:
+            <select id="model-select"></select>
+        </label>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="input-row">
+        <input id="user-input" placeholder="Ask a DevOps question…" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const history = [];
+
+        // Populate model selector from /models
+        async function loadModels() {
+            const resp = await fetch('/models');
+            const { models } = await resp.json();
+            const select = document.getElementById('model-select');
+            models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = opt.textContent = m;
+                select.appendChild(opt);
+            });
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+
+            const model = document.getElementById('model-select').value;
+
+            appendMessage('user', msg);
+            history.push({ role: 'user', content: msg });
+
+            const aiDiv = appendMessage('ai', '');
+            const span = aiDiv.querySelector('span');
+            let full = '';
+
+            // Send request with current message + history + selected model
+            const resp = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, history: history.slice(0, -1), model })
+            });
+
+            // Read the streaming response token by token
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                full += decoder.decode(value);
+                span.textContent = full;
+            }
+
+            history.push({ role: 'assistant', content: full });
+        }
+
+        function appendMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = role === 'user' ? 'msg-user' : 'msg-ai';
+            div.innerHTML = '<span>' + text + '</span>';
+            document.getElementById('messages').appendChild(div);
+            div.scrollIntoView();
+            return div;
+        }
+
+        document.getElementById('user-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        loadModels();
+    </script>
+</body>
+
+</html>
