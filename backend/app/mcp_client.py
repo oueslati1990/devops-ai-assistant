@@ -1,7 +1,7 @@
 import os
 from fastmcp import Client
 
-_SERVER_PATH = os.path.join(os.path.dirname(__file__), "../../../mcp-server/server.py")
+_SERVER_PATH = os.path.join(os.path.dirname(__file__), "../../mcp-server/server.py")
 _client = Client(_SERVER_PATH)
 
 

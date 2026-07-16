@@ -16,7 +16,7 @@ def git_read(repo_path: str, command: str) -> str:
     return _git_read(repo_path, command)
 
 
-@mcp.tool
+@mcp.tool()
 def analyze_logs(log_content: str, focus: str = "all") -> str:
     """Parses raw logs and extracts errors, warnings
 

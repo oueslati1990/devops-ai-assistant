@@ -31,7 +31,12 @@ async def _llm_call(messages: list[dict], model: str, tools: list[dict]):
     async with httpx.AsyncClient(timeout=120) as client:
         resp = await client.post(
             f"{LLM_BASE_URL}/v1/chat/completions",
-            json={"model": model, "messages": messages, tools: tools, "stream": False},
+            json={
+                "model": model,
+                "messages": messages,
+                "tools": tools,
+                "stream": False,
+            },
         )
         resp.raise_for_status()
         return resp.json()
@@ -55,7 +60,7 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
                 {"role": "tool", "tool_call_id": tc["id"], "content": tool_resp}
             )
 
-        for chunck in stream_llm_response(messages, model):
+        async for chunck in stream_llm_response(messages, model):
             yield chunck
     else:
         yield choice["message"].get("content", "")
