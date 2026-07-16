@@ -7,6 +7,7 @@ import httpx
 
 from app.config import LLM_BASE_URL
 from app.mcp_client import get_tool_definitions, call_tool
+from app.constants import MAX_TOOL_ITERATIONS
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,8 @@ async def _llm_call(messages: list[dict], model: str, tools: list[dict]):
     usage = data.get("usage", {})
     logger.info(
         "LLM call: model=%s latency=%.2fs prompt_tokens=%s completion_tokens=%s",
-        model, elapsed,
+        model,
+        elapsed,
         usage.get("prompt_tokens", "n/a"),
         usage.get("completion_tokens", "n/a"),
     )
@@ -60,14 +62,28 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
     logger.info("run_with_tools: model=%s context_messages=%d", model, len(messages))
 
     tools = await get_tool_definitions()
-    logger.debug("Loaded %d tool(s) from MCP server: %s", len(tools), [t["function"]["name"] for t in tools])
+    logger.debug(
+        "Loaded %d tool(s) from MCP server: %s",
+        len(tools),
+        [t["function"]["name"] for t in tools],
+    )
 
-    response = await _llm_call(messages, model, tools)
-    choice = response["choices"][0]
-    finish_reason = choice.get("finish_reason")
-    logger.info("finish_reason=%s", finish_reason)
+    for iteration in range(MAX_TOOL_ITERATIONS):
+        response = await _llm_call(messages, model, tools)
+        choice = response["choices"][0]
+        finish_reason = choice.get("finish_reason")
+        logger.info(
+            "finish_reason=%s (iteration %d/%d)",
+            finish_reason,
+            iteration + 1,
+            MAX_TOOL_ITERATIONS,
+        )
 
-    if finish_reason == "tool_calls":
+        if finish_reason != "tool_calls":
+            async for chunk in stream_llm_response(messages, model):
+                yield chunk
+            return
+
         assistant_msg = choice["message"]
         tool_calls = assistant_msg.get("tool_calls", [])
         logger.info("Dispatching %d tool call(s)", len(tool_calls))
@@ -85,7 +101,8 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
                 {"role": "tool", "tool_call_id": tc["id"], "content": tool_resp}
             )
 
-        async for chunk in stream_llm_response(messages, model):
-            yield chunk
-    else:
-        yield choice["message"].get("content", "")
+    logger.warning(
+        "Max tool iterations (%d) reached, forcing final response", MAX_TOOL_ITERATIONS
+    )
+    async for chunk in stream_llm_response(messages, model):
+        yield chunk
