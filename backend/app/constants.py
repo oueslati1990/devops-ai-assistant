@@ -16,3 +16,4 @@ Behavioral rules:
 
 
 MAX_HISTORY = 20  # Max messages to keep
+MAX_TOOL_ITERATIONS = 5
