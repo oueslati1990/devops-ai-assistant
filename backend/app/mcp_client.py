@@ -1,11 +1,10 @@
-import os
 from fastmcp import Client
 import logging
+from app.config import MCP_SERVER_URL
 
 logger = logging.getLogger(__name__)
 
-_SERVER_PATH = os.path.join(os.path.dirname(__file__), "../../mcp-server/server.py")
-_client = Client(_SERVER_PATH)
+_client = Client(MCP_SERVER_URL)
 
 
 async def call_tool(name: str, arguments: dict) -> str:

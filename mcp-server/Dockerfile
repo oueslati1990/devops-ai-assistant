@@ -17,6 +17,8 @@ COPY . .
 ENV PATH=/app/.venv/bin:$PATH
 ENV PYTHONUNBUFFERED=1
 
+EXPOSE 8001
+
 RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
