@@ -1,0 +1,10 @@
+[project]
+name = "mcp-server"
+version = "0.1.0"
+description = "mcp-server for devops ai assistant"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "gitpython>=3.1.51",
+    "mcp>=1.28.1",
+]
