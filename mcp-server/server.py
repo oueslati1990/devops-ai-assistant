@@ -2,7 +2,7 @@ from mcp.server.fastmcp import FastMCP
 from tools.git_tools import git_read as _git_read
 from tools.log_tools import analyze_logs as _analyze_logs
 
-mcp = FastMCP("Devops ai assistant")
+mcp = FastMCP("Devops ai assistant", host="0.0.0.0", port=8001)
 
 
 @mcp.tool()
@@ -28,4 +28,4 @@ def analyze_logs(log_content: str, focus: str = "all") -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8001)
+    mcp.run(transport="streamable-http")
