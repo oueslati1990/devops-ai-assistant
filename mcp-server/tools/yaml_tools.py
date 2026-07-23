@@ -7,6 +7,7 @@ def generate_yaml(type: str, params: dict) -> str:
         "k8s-service": _k8s_service,
         "k8s-ingress": _k8s_ingress,
         "k8s-configmap": _k8s_configmap,
+        "docker-compose": _docker_compose,
     }
 
     if type not in generators:
@@ -14,6 +15,23 @@ def generate_yaml(type: str, params: dict) -> str:
 
     manifest = generators[type](params)
     return f"```yaml\n{yaml.dump(manifest, default_flow_style=False)}```"
+
+
+def _docker_compose(params: dict) -> dict:
+    name = params.get("name", "my-app")
+    image = params.get("image", "myapp:latest")
+    port = int(params.get("port", 8000))
+    return {
+        "version": "3.9",
+        "services": {
+            name: {
+                "image": image,
+                "ports": [f"{port}:{port}"],
+                "environment": {"PORT": port},
+                "restart": "unless-stopped",
+            }
+        },
+    }
 
 
 def _k8s_configmap(params: dict) -> dict:

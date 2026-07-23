@@ -34,7 +34,7 @@ def generate_yaml(type: str, params: dict) -> str:
 
     Args:
         type: Resource kind to generate. Supported values: 'deployment', 'service',
-              'configmap', 'ingress', 'cronjob'.
+              'configmap', 'ingress', 'docker-compose'.
         params: Key/value pairs that populate the manifest, e.g.
                 {"name": "my-app", "image": "nginx:latest", "replicas": 3}.
 
