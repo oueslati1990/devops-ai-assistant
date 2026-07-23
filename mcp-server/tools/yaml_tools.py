@@ -2,13 +2,28 @@ import yaml
 
 
 def generate_yaml(type: str, params: dict) -> str:
-    generators = {"k8s-deployment": _k8s_deployment}
+    generators = {"k8s-deployment": _k8s_deployment, "k8s-service": _k8s_service}
 
     if type not in generators:
         return f"Unkown type: {type}. Choose from {", ".join(generators)}"
 
     manifest = generators[type](params)
     return f"```yaml\n{yaml.dump(manifest, default_flow_style=False)}```"
+
+
+def _k8s_service(params: dict) -> dict:
+    name = params.get("name", "my-app")
+    port = int(params.get("port", 8000))
+    return {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {"name": name},
+        "spec": {
+            "selector": {"app": name},
+            "ports": [{"protocol": "TCP", "port": 80, "targetPort": port}],
+            "type": params.get("type", "ClusterIP"),
+        },
+    }
 
 
 def _k8s_deployment(params: dict) -> dict:
