@@ -7,4 +7,5 @@ requires-python = ">=3.14"
 dependencies = [
     "gitpython>=3.1.51",
     "mcp>=1.28.1",
+    "pyyaml>=6.0.3",
 ]
