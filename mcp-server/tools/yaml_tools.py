@@ -2,13 +2,49 @@ import yaml
 
 
 def generate_yaml(type: str, params: dict) -> str:
-    generators = {"k8s-deployment": _k8s_deployment, "k8s-service": _k8s_service}
+    generators = {
+        "k8s-deployment": _k8s_deployment,
+        "k8s-service": _k8s_service,
+        "k8s-ingress": _k8s_ingress,
+    }
 
     if type not in generators:
         return f"Unkown type: {type}. Choose from {", ".join(generators)}"
 
     manifest = generators[type](params)
     return f"```yaml\n{yaml.dump(manifest, default_flow_style=False)}```"
+
+
+def _k8s_ingress(params: dict) -> dict:
+    name = params.get("name", "my-app")
+    host = params.get("host", f"{name}.example.com")
+    return {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+            "name": name,
+            "annotations": {"nginx.ingress.kubernetes.io/rewrite-target": "/"},
+        },
+        "spec": {
+            "ingressClassName": "nginx",
+            "rules": [
+                {
+                    "host": host,
+                    "http": {
+                        "paths": [
+                            {
+                                "path": "/",
+                                "pathType": "Prefix",
+                                "backend": {
+                                    "service": {"name": name, "port": {"number": 80}}
+                                },
+                            }
+                        ]
+                    },
+                }
+            ],
+        },
+    }
 
 
 def _k8s_service(params: dict) -> dict:
