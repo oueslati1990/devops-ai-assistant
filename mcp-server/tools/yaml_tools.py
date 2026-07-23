@@ -6,6 +6,7 @@ def generate_yaml(type: str, params: dict) -> str:
         "k8s-deployment": _k8s_deployment,
         "k8s-service": _k8s_service,
         "k8s-ingress": _k8s_ingress,
+        "k8s-configmap": _k8s_configmap,
     }
 
     if type not in generators:
@@ -13,6 +14,17 @@ def generate_yaml(type: str, params: dict) -> str:
 
     manifest = generators[type](params)
     return f"```yaml\n{yaml.dump(manifest, default_flow_style=False)}```"
+
+
+def _k8s_configmap(params: dict) -> dict:
+    name = params.get("name", "my-app")
+    data = params.get("data", {"Key": "value"})
+    return {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {"name": name},
+        "data": data,
+    }
 
 
 def _k8s_ingress(params: dict) -> dict:
