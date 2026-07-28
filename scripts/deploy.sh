@@ -5,3 +5,5 @@ kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/backend-deployment.yaml
 kubectl apply -f k8s/backend-service.yaml
 kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/mcp-deployment.yaml
+kubectl apply -f k8s/mcp-service.yaml
