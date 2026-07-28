@@ -26,6 +26,8 @@ spec:
               value: "http://ollama:11434"
             - name: LLM_MODEL
               value: "llama3.2"
+            - name: MCP_BASE_URL
+              value: "http://mcp-server"
           resources:
             requests:
               memory: "256Mi"
