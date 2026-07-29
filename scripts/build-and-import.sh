@@ -8,6 +8,8 @@ IMAGES=(
   "devops-ai-mcp:./mcp-server"
 )
 
+OLLAMA_IMAGE="ollama/ollama:latest"
+
 for entry in "${IMAGES[@]}"; do
   name="${entry%%:*}"
   context="${entry#*:}"
@@ -22,6 +24,12 @@ for entry in "${IMAGES[@]}"; do
   echo "==> Done: ${full}"
 done
 
+echo "==> Pulling ${OLLAMA_IMAGE}"
+docker pull "${OLLAMA_IMAGE}"
+echo "==> Importing ${OLLAMA_IMAGE} into k3s"
+docker save "${OLLAMA_IMAGE}" | sudo k3s ctr images import -
+echo "==> Done: ${OLLAMA_IMAGE}"
+
 echo ""
 echo "Verify with:"
-echo "  sudo k3s ctr images ls | grep devops-ai"
+echo "  sudo k3s ctr images ls | grep -E 'devops-ai|ollama'"
