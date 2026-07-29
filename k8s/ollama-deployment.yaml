@@ -19,19 +19,11 @@ spec:
         - name: ollama
           image: ollama/ollama:latest
           imagePullPolicy: Never
-          ports:
-            - containerPort: 11434
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "500m"
+              memory: "128Mi"
+              cpu: "100m"
             limits:
-              memory: "8Gi"
-              cpu: "2"
-          volumeMounts:
-            - name: ollama-models
-              mountPath: /root/.ollama
-      volumes:
-        - name: ollama-models
-          persistentVolumeClaim:
-            claimName: ollama-models
+              memory: "256Mi"
+              cpu: "250m"
+      volumes: ollama-data:/root/.ollama
