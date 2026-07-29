@@ -26,4 +26,10 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "250m"
-      volumes: ollama-data:/root/.ollama
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-models
