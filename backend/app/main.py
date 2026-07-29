@@ -19,9 +19,11 @@ logging.getLogger("mcp").setLevel(logging.WARNING)
 app = FastAPI(title="AI Devops Assistant")
 app.include_router(chat.router)
 app.include_router(model.router)
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "model": LLM_MODEL}
+
+
+app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
