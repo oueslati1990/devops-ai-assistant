@@ -6,6 +6,6 @@ metadata:
 data:
   LLM_BASE_URL: "http://ollama:11434"
   LLM_MODEL: "llama3.2"
-  MCP_BASE_URL: "http://mcp-server"
+  MCP_SERVER_URL: "http://mcp-server/mcp"
   MAX_HISTORY: "20"
   LOG_LEVEL: "INFO"
