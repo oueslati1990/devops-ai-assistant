@@ -19,6 +19,8 @@ spec:
         - name: mcp-server
           image: devops-ai-mcp:latest
           imagePullPolicy: Never
+          ports:
+            - containerPort: 8001
           resources:
             requests:
               memory: "128Mi"
