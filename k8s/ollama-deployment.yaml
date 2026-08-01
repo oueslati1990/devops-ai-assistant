@@ -33,10 +33,27 @@ spec:
               cpu: "500m"
             limits:
               memory: "6Gi"
+          env:
+            - name: HSA_OVERRIDE_GFX_VERSION
+              value: "11.0.1"
+            - name: OLLAMA_IGPU_ENABLE
+              value: "1"
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: ollama-data
               mountPath: /root/.ollama
+            - name: dev-kfd
+              mountPath: /dev/kfd
+            - name: dev-dri
+              mountPath: /dev/dri
       volumes:
         - name: ollama-data
           persistentVolumeClaim:
             claimName: ollama-models
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
