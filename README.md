@@ -33,24 +33,30 @@ kubectl get nodes
 ./scripts/build-and-import.sh
 ```
 
-This builds both Docker images and imports them into k3s's containerd store. Re-run after every code change.
-
 ### 4. Deploy
 
 ```bash
 ./scripts/deploy.sh
 ```
 
-Watch pods come up:
+### 5. Wait for pods to be ready
 
 ```bash
 kubectl get pods -n devops-ai --watch
 ```
 
-### 5. Access the backend
+### 6. Access the app
 
 ```bash
 kubectl port-forward svc/backend 8080:80 -n devops-ai
 ```
 
 Open http://localhost:8080
+
+## After a code change
+
+```bash
+./scripts/build-and-import.sh
+kubectl rollout restart deployment/backend -n devops-ai
+kubectl rollout restart deployment/mcp-server -n devops-ai  # if mcp-server changed
+```
