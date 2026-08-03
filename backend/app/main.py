@@ -2,6 +2,7 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.routers import chat, model
 from app.config import LLM_MODEL
@@ -17,6 +18,9 @@ logging.getLogger("fastmcp").setLevel(logging.WARNING)
 logging.getLogger("mcp").setLevel(logging.WARNING)
 
 app = FastAPI(title="AI Devops Assistant")
+
+Instrumentator().instrument(app).expose(app)
+
 app.include_router(chat.router)
 app.include_router(model.router)
 
