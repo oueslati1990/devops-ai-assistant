@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend
+  namespace: devops-ai # same namespace as backend
+  labels:
+    release: monitoring # must match the Helm release name
+spec:
+  selector:
+    matchLabels:
+      app: backend # must match backend Service labels
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
