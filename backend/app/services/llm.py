@@ -8,6 +8,12 @@ import httpx
 from app.config import LLM_BASE_URL
 from app.mcp_client import get_tool_definitions, call_tool
 from app.constants import MAX_TOOL_ITERATIONS
+from app.metrics import (
+    llm_token_prompt,
+    llm_tokens_completion,
+    llm_latency,
+    tool_iterations,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +53,10 @@ async def _llm_call(messages: list[dict], model: str, tools: list[dict]):
         resp.raise_for_status()
         data = resp.json()
     elapsed = time.perf_counter() - t0
+    llm_latency.observe(elapsed)
     usage = data.get("usage", {})
+    llm_token_prompt.observe(usage.get("prompt_tokens", 0))
+    llm_tokens_completion.observe(usage.get("completion_tokens", 0))
     logger.info(
         "LLM call: model=%s latency=%.2fs prompt_tokens=%s completion_tokens=%s",
         model,
@@ -68,6 +77,7 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
         [t["function"]["name"] for t in tools],
     )
 
+    iteration = 0
     for iteration in range(MAX_TOOL_ITERATIONS):
         response = await _llm_call(messages, model, tools)
         choice = response["choices"][0]
@@ -80,6 +90,7 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
         )
 
         if finish_reason != "tool_calls":
+            tool_iterations.observe(iteration + 1)
             async for chunk in stream_llm_response(messages, model):
                 yield chunk
             return
@@ -104,5 +115,6 @@ async def run_with_tools(messages: list[dict], model: str) -> AsyncGenerator[str
     logger.warning(
         "Max tool iterations (%d) reached, forcing final response", MAX_TOOL_ITERATIONS
     )
+    tool_iterations.observe(MAX_TOOL_ITERATIONS)
     async for chunk in stream_llm_response(messages, model):
         yield chunk
