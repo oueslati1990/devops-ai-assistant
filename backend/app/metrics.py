@@ -1,4 +1,4 @@
-from prometheus_fastapi_instrumentator import Counter, Histogram
+from prometheus_client import Counter, Histogram
 
 llm_latency = Histogram(
     "llm_call_duration_seconds",
