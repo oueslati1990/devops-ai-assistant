@@ -1,5 +1,5 @@
 # Add the Helm repo
-# This will install It installs Prometheus, Grafana, node-exporter (hardware metrics), 
+# This will install Prometheus, Grafana, node-exporter (hardware metrics), 
 # kube-state-metrics (pod health), and AlertManager in one command.
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
